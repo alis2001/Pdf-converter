@@ -1,0 +1,180 @@
+# =====================================================
+# ENTERPRISE PDF CONVERTER - GITIGNORE
+# =====================================================
+# Protects secrets while allowing infrastructure files to be committed
+
+# =====================================================
+# SENSITIVE DATA - NEVER COMMIT
+# =====================================================
+# Production environment files (development .env is OK to commit with dummy data)
+.env.production
+.env.staging
+.env.prod
+.env.stage
+
+# Real SSL certificates and keys
+ssl/
+certificates/
+certs/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Real API keys and tokens
+api-keys.production.json
+tokens.production.json
+*.production.token
+
+# =====================================================
+# RUNTIME DATA & LOGS - EXCLUDE
+# =====================================================
+# Log files
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# =====================================================
+# NODE.JS DEPENDENCIES - EXCLUDE
+# =====================================================
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Package manager files (keep package.json, exclude locks temporarily)
+# npm-shrinkwrap.json
+
+# =====================================================
+# BUILD OUTPUTS - EXCLUDE
+# =====================================================
+# Build directories
+dist/
+build/
+*.tgz
+*.tar.gz
+
+# Compiled binary files
+*.o
+*.so
+*.dylib
+*.dll
+
+# =====================================================
+# DATABASE & STORAGE - EXCLUDE RUNTIME DATA
+# =====================================================
+# Database files (runtime data, not schema)
+*.db
+*.sqlite
+*.sqlite3
+
+# Upload directories (runtime files, not structure)
+uploads/*
+temp-uploads/*
+!uploads/.gitkeep
+!temp-uploads/.gitkeep
+
+# Backup files (runtime backups, not backup configs)
+backups/postgres/*
+backups/minio/*
+!backups/postgres/.gitkeep
+!backups/minio/.gitkeep
+
+# =====================================================
+# DOCKER RUNTIME - EXCLUDE
+# =====================================================
+# Docker runtime data
+.docker/
+
+# =====================================================
+# IDE & OS FILES - EXCLUDE
+# =====================================================
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Vim
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# =====================================================
+# TESTING & COVERAGE - EXCLUDE
+# =====================================================
+# Coverage reports
+coverage/
+*.lcov
+.nyc_output
+
+# Test results
+test-results/
+junit.xml
+
+# =====================================================
+# TEMPORARY FILES - EXCLUDE
+# =====================================================
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Cache directories
+.cache
+.parcel-cache
+.next
+.nuxt
+
+# =====================================================
+# WHAT GETS COMMITTED (INFRASTRUCTURE FILES)
+# =====================================================
+# ✅ All these files WILL be committed:
+# - docker-compose.yml
+# - .env (development with dummy passwords)
+# - infrastructure/ (all config files)
+# - backend/ (service code when created)
+# - frontend/ (app code when created)
+# - scripts/ (automation scripts)
+# - docs/ (documentation)
+# - README.md, package.json files
+
+# =====================================================
+# KEEP DIRECTORY STRUCTURE
+# =====================================================
+# Keep empty directories
+!.gitkeep
+
+# =====================================================
+# NOTES FOR PRODUCTION
+# =====================================================
+# For production deployment:
+# 1. Copy .env to .env.production with real secrets
+# 2. Use real SSL certificates
+# 3. Set strong passwords in production environment
+# 4. Use secrets management (Vault, AWS Secrets Manager, etc.)
+# 5. Enable security scanning in CI/CD pipeline

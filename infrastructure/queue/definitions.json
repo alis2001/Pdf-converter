@@ -1,0 +1,406 @@
+{
+  "rabbit_version": "3.12.0",
+  "rabbitmq_version": "3.12.0",
+  "product_name": "RabbitMQ",
+  "product_version": "3.12.0",
+  "users": [
+    {
+      "name": "rabbit_admin",
+      "password_hash": "gEw4xHd5BoXRwkSZ3jyq5Jq7tJ3n5LLnO8x8x8x8x8x",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": [
+        "administrator"
+      ],
+      "limits": {}
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "/",
+      "description": "Default virtual host for PDF Converter",
+      "tags": [],
+      "default_queue_type": "classic",
+      "tracing": false
+    }
+  ],
+  "permissions": [
+    {
+      "user": "rabbit_admin",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "topic_permissions": [],
+  "parameters": [],
+  "global_parameters": [
+    {
+      "name": "cluster_name",
+      "value": "pdf-converter-cluster"
+    }
+  ],
+  "policies": [
+    {
+      "vhost": "/",
+      "name": "conversion-queue-policy",
+      "pattern": "pdf-conversion.*",
+      "apply-to": "queues",
+      "definition": {
+        "message-ttl": 1800000,
+        "max-length": 10000,
+        "overflow": "reject-publish",
+        "dead-letter-exchange": "pdf-converter-dlx",
+        "dead-letter-routing-key": "failed"
+      },
+      "priority": 1
+    },
+    {
+      "vhost": "/",
+      "name": "notification-queue-policy", 
+      "pattern": "notification.*",
+      "apply-to": "queues",
+      "definition": {
+        "message-ttl": 86400000,
+        "max-length": 50000,
+        "overflow": "drop-head"
+      },
+      "priority": 1
+    },
+    {
+      "vhost": "/",
+      "name": "webhook-queue-policy",
+      "pattern": "webhook.*", 
+      "apply-to": "queues",
+      "definition": {
+        "message-ttl": 604800000,
+        "max-length": 25000,
+        "dead-letter-exchange": "pdf-converter-dlx",
+        "dead-letter-routing-key": "webhook-failed"
+      },
+      "priority": 1
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "pdf-converter-exchange",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "pdf-converter-fanout",
+      "vhost": "/", 
+      "type": "fanout",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "pdf-converter-dlx",
+      "vhost": "/",
+      "type": "direct", 
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "pdf-converter-delay",
+      "vhost": "/",
+      "type": "x-delayed-message",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {
+        "x-delayed-type": "direct"
+      }
+    },
+    {
+      "name": "pdf-converter-priority",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "pdf-conversion-queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-max-priority": 10,
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "pdf-conversion-priority-queue", 
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-max-priority": 10,
+        "x-queue-type": "classic",
+        "x-message-ttl": 900000
+      }
+    },
+    {
+      "name": "pdf-conversion-retry-queue",
+      "vhost": "/", 
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 300000,
+        "x-dead-letter-exchange": "pdf-converter-exchange",
+        "x-dead-letter-routing-key": "convert.retry"
+      }
+    },
+    {
+      "name": "notification-queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "notification-email-queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false, 
+      "arguments": {
+        "x-queue-type": "classic",
+        "x-max-priority": 5
+      }
+    },
+    {
+      "name": "notification-push-queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic",
+        "x-max-priority": 5
+      }
+    },
+    {
+      "name": "notification-websocket-queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "webhook-delivery-queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic",
+        "x-max-priority": 3
+      }
+    },
+    {
+      "name": "webhook-retry-queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 300000,
+        "x-dead-letter-exchange": "pdf-converter-exchange", 
+        "x-dead-letter-routing-key": "webhook.retry"
+      }
+    },
+    {
+      "name": "cleanup-files-queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic",
+        "x-max-priority": 1
+      }
+    },
+    {
+      "name": "cleanup-temp-queue", 
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic",
+        "x-message-ttl": 3600000
+      }
+    },
+    {
+      "name": "analytics-queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "audit-log-queue",
+      "vhost": "/",
+      "durable": true, 
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "pdf-conversion-failed-queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic",
+        "x-message-ttl": 604800000
+      }
+    },
+    {
+      "name": "webhook-failed-queue",
+      "vhost": "/", 
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic",
+        "x-message-ttl": 604800000
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "source": "pdf-converter-exchange",
+      "vhost": "/",
+      "destination": "pdf-conversion-queue",
+      "destination_type": "queue",
+      "routing_key": "convert.pdf",
+      "arguments": {}
+    },
+    {
+      "source": "pdf-converter-exchange",
+      "vhost": "/", 
+      "destination": "pdf-conversion-priority-queue",
+      "destination_type": "queue",
+      "routing_key": "convert.priority",
+      "arguments": {}
+    },
+    {
+      "source": "pdf-converter-exchange",
+      "vhost": "/",
+      "destination": "pdf-conversion-retry-queue", 
+      "destination_type": "queue",
+      "routing_key": "convert.retry",
+      "arguments": {}
+    },
+    {
+      "source": "pdf-converter-exchange",
+      "vhost": "/",
+      "destination": "notification-queue",
+      "destination_type": "queue", 
+      "routing_key": "notify.general",
+      "arguments": {}
+    },
+    {
+      "source": "pdf-converter-exchange",
+      "vhost": "/",
+      "destination": "notification-email-queue",
+      "destination_type": "queue",
+      "routing_key": "notify.email",
+      "arguments": {}
+    },
+    {
+      "source": "pdf-converter-exchange",
+      "vhost": "/",
+      "destination": "notification-push-queue",
+      "destination_type": "queue",
+      "routing_key": "notify.push", 
+      "arguments": {}
+    },
+    {
+      "source": "pdf-converter-exchange", 
+      "vhost": "/",
+      "destination": "notification-websocket-queue",
+      "destination_type": "queue",
+      "routing_key": "notify.websocket",
+      "arguments": {}
+    },
+    {
+      "source": "pdf-converter-exchange",
+      "vhost": "/",
+      "destination": "webhook-delivery-queue",
+      "destination_type": "queue",
+      "routing_key": "webhook.deliver",
+      "arguments": {}
+    },
+    {
+      "source": "pdf-converter-exchange",
+      "vhost": "/", 
+      "destination": "webhook-retry-queue",
+      "destination_type": "queue",
+      "routing_key": "webhook.retry", 
+      "arguments": {}
+    },
+    {
+      "source": "pdf-converter-exchange",
+      "vhost": "/",
+      "destination": "cleanup-files-queue",
+      "destination_type": "queue",
+      "routing_key": "cleanup.files",
+      "arguments": {}
+    },
+    {
+      "source": "pdf-converter-exchange",
+      "vhost": "/",
+      "destination": "cleanup-temp-queue",
+      "destination_type": "queue", 
+      "routing_key": "cleanup.temp",
+      "arguments": {}
+    },
+    {
+      "source": "pdf-converter-fanout",
+      "vhost": "/",
+      "destination": "analytics-queue",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    },
+    {
+      "source": "pdf-converter-fanout",
+      "vhost": "/",
+      "destination": "audit-log-queue", 
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    },
+    {
+      "source": "pdf-converter-dlx",
+      "vhost": "/",
+      "destination": "pdf-conversion-failed-queue",
+      "destination_type": "queue",
+      "routing_key": "failed", 
+      "arguments": {}
+    },
+    {
+      "source": "pdf-converter-dlx",
+      "vhost": "/",
+      "destination": "webhook-failed-queue",
+      "destination_type": "queue",
+      "routing_key": "webhook-failed",
+      "arguments": {}
+    }
+  ]
+}

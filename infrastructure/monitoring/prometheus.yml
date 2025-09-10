@@ -1,0 +1,363 @@
+# =====================================================
+# Prometheus Configuration for PDF Converter
+# =====================================================
+# Comprehensive monitoring for all services
+
+global:
+  # How frequently to scrape targets by default
+  scrape_interval: 15s
+  
+  # How long until a scrape request times out
+  scrape_timeout: 10s
+  
+  # How frequently to evaluate rules
+  evaluation_interval: 15s
+  
+  # Attach these labels to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+  external_labels:
+    cluster: 'pdf-converter'
+    environment: 'development'
+
+# Alertmanager configuration (for future use)
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# =====================================================
+# SCRAPE CONFIGURATIONS
+# =====================================================
+scrape_configs:
+  # =====================================================
+  # PROMETHEUS SELF-MONITORING
+  # =====================================================
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    metrics_path: '/metrics'
+    scrape_interval: 5s
+    scrape_timeout: 5s
+
+  # =====================================================
+  # INFRASTRUCTURE SERVICES
+  # =====================================================
+  
+  # PostgreSQL Database Monitoring
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    params:
+      target: ['postgres:5432']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: postgres-exporter:9187
+
+  # Redis Cache Monitoring
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    params:
+      target: ['redis:6379']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: redis-exporter:9121
+
+  # RabbitMQ Message Queue Monitoring
+  - job_name: 'rabbitmq'
+    static_configs:
+      - targets: ['rabbitmq:15692']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    basic_auth:
+      username: 'rabbit_admin'
+      password: 'RabbitSecure2024!'
+
+  # MinIO Object Storage Monitoring
+  - job_name: 'minio'
+    static_configs:
+      - targets: ['minio:9000']
+    metrics_path: '/minio/v2/metrics/cluster'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # NGINX Reverse Proxy Monitoring
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx:80']
+    metrics_path: '/nginx_status'
+    scrape_interval: 15s
+    scrape_timeout: 5s
+
+  # =====================================================
+  # APPLICATION SERVICES
+  # =====================================================
+
+  # API Gateway Monitoring
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['api-gateway:3000']
+    metrics_path: '/metrics'
+    scrape_interval: 5s
+    scrape_timeout: 5s
+    params:
+      format: ['prometheus']
+
+  # Authentication Service Monitoring  
+  - job_name: 'auth-service'
+    static_configs:
+      - targets: ['auth-service:3000']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    params:
+      format: ['prometheus']
+
+  # File Service Monitoring
+  - job_name: 'file-service'
+    static_configs:
+      - targets: ['file-service:3000']  
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    params:
+      format: ['prometheus']
+
+  # Conversion Engine Monitoring
+  - job_name: 'conversion-engine'
+    static_configs:
+      - targets: ['conversion-engine:3000']
+    metrics_path: '/metrics'
+    scrape_interval: 5s
+    scrape_timeout: 5s
+    params:
+      format: ['prometheus']
+
+  # Notification Service Monitoring
+  - job_name: 'notification-service'
+    static_configs:
+      - targets: ['notification-service:3000']
+    metrics_path: '/metrics' 
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    params:
+      format: ['prometheus']
+
+  # =====================================================
+  # SYSTEM MONITORING (Node Exporter for future use)
+  # =====================================================
+  
+  # System metrics (CPU, Memory, Disk, Network)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # Docker container metrics
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # =====================================================
+  # CUSTOM METRICS ENDPOINTS
+  # =====================================================
+
+  # Health check endpoints for all services
+  - job_name: 'health-checks'
+    static_configs:
+      - targets: 
+        - 'api-gateway:3000'
+        - 'auth-service:3000'
+        - 'file-service:3000'
+        - 'conversion-engine:3000'
+        - 'notification-service:3000'
+    metrics_path: '/health'
+    scrape_interval: 30s
+    scrape_timeout: 5s
+    params:
+      format: ['json']
+
+  # Application-specific metrics
+  - job_name: 'pdf-converter-metrics'
+    static_configs:
+      - targets:
+        - 'api-gateway:3000'
+        - 'file-service:3000'
+        - 'conversion-engine:3000'
+    metrics_path: '/api/v1/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    params:
+      format: ['prometheus']
+
+  # =====================================================
+  # BUSINESS METRICS
+  # =====================================================
+
+  # Conversion job metrics
+  - job_name: 'conversion-stats'
+    static_configs:
+      - targets: ['conversion-engine:3000']
+    metrics_path: '/internal/stats'
+    scrape_interval: 60s
+    scrape_timeout: 10s
+    params:
+      format: ['prometheus']
+
+  # User activity metrics  
+  - job_name: 'user-activity'
+    static_configs:
+      - targets: ['api-gateway:3000']
+    metrics_path: '/internal/activity'
+    scrape_interval: 60s
+    scrape_timeout: 10s
+    params:
+      format: ['prometheus']
+
+  # File processing metrics
+  - job_name: 'file-stats'
+    static_configs:
+      - targets: ['file-service:3000']
+    metrics_path: '/internal/stats'
+    scrape_interval: 60s
+    scrape_timeout: 10s
+    params:
+      format: ['prometheus']
+
+# =====================================================
+# RECORDING RULES (for pre-computed metrics)
+# =====================================================
+# These will be defined in separate rule files when needed
+
+# =====================================================
+# REMOTE WRITE CONFIGURATION (for long-term storage)
+# =====================================================
+# remote_write:
+#   - url: "https://prometheus-remote-write-endpoint/api/v1/write"
+#     basic_auth:
+#       username: "username"
+#       password: "password"
+
+# =====================================================
+# STORAGE CONFIGURATION
+# =====================================================
+# Retention policy for local storage
+# --storage.tsdb.retention.time=15d (set via command line)
+# --storage.tsdb.retention.size=10GB (set via command line)
+
+# =====================================================
+# METRIC RELABELING (for data cleanup)
+# =====================================================
+# Global relabeling rules applied to all scraped metrics
+metric_relabel_configs: []
+
+# =====================================================
+# TARGET DISCOVERY CONFIGURATION
+# =====================================================
+# For dynamic service discovery in Kubernetes or Consul
+# Currently using static configs for simplicity
+
+# =====================================================
+# MONITORING TARGETS SUMMARY
+# =====================================================
+# Infrastructure:
+# - Prometheus self-monitoring
+# - PostgreSQL database metrics
+# - Redis cache performance  
+# - RabbitMQ queue statistics
+# - MinIO storage metrics
+# - NGINX proxy performance
+
+# Application Services:
+# - API Gateway (request rates, response times, errors)
+# - Auth Service (login attempts, token validation)
+# - File Service (upload/download rates, storage usage)
+# - Conversion Engine (job processing, success/failure rates)
+# - Notification Service (delivery rates, queue depths)
+
+# System Monitoring:
+# - Node Exporter (CPU, memory, disk, network)
+# - cAdvisor (container metrics)
+# - Health checks for all services
+
+# Business Metrics:
+# - Conversion job statistics
+# - User activity patterns
+# - File processing analytics
+# - Performance benchmarks
+
+# =====================================================
+# KEY METRICS TO MONITOR
+# =====================================================
+# Performance Metrics:
+# - HTTP request duration (histogram)
+# - HTTP request rate (counter)
+# - HTTP error rate (counter)
+# - Database connection pool utilization
+# - Queue depth and processing rate
+# - Memory and CPU utilization
+# - Disk I/O and storage usage
+
+# Business Metrics:
+# - PDF conversion success rate
+# - Average conversion time
+# - File upload/download volumes
+# - User registration/login rates
+# - API usage by endpoint
+# - Premium vs free user activity
+
+# Reliability Metrics:
+# - Service uptime/availability
+# - Error rates by service
+# - Failed job recovery rates  
+# - Database query performance
+# - Cache hit/miss ratios
+# - Network latency between services
+
+# =====================================================
+# ALERTING RULES (to be defined)
+# =====================================================
+# High-priority alerts:
+# - Service down (availability < 99%)
+# - High error rate (>5% of requests)
+# - Database connection failures
+# - Queue backlog (>1000 pending jobs)
+# - Disk space low (<10% free)
+# - Memory usage high (>90%)
+
+# Medium-priority alerts:
+# - Slow response times (>2s p95)
+# - Conversion job failures (>10%)
+# - Cache performance degradation
+# - Unusual traffic patterns
+
+# Low-priority alerts:
+# - Daily/weekly usage reports
+# - Performance trending
+# - Capacity planning alerts

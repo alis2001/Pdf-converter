@@ -1,0 +1,272 @@
+# =====================================================
+# Grafana Data Sources Configuration for PDF Converter
+# =====================================================
+# This file configures all data sources for monitoring dashboards
+
+apiVersion: 1
+
+# =====================================================
+# DATA SOURCES CONFIGURATION
+# =====================================================
+datasources:
+  # =====================================================
+  # PROMETHEUS DATA SOURCE (Primary metrics)
+  # =====================================================
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    orgId: 1
+    url: http://prometheus:9090
+    isDefault: true
+    version: 1
+    editable: true
+    jsonData:
+      httpMethod: POST
+      manageAlerts: true
+      prometheusType: Prometheus
+      prometheusVersion: 2.40.0
+      cacheLevel: 'High'
+      disableRecordingRules: false
+      incrementalQueryOverlapWindow: 10m
+      queryTimeout: 60s
+      timeInterval: 15s
+      tlsAuth: false
+      tlsAuthWithCACert: false
+      tlsSkipVerify: false
+      # Custom query editor settings
+      exemplarTraceIdDestinations:
+        - name: trace_id
+          datasourceUid: 'jaeger-uid'
+          url: 'http://jaeger:16686/trace/$${__value.raw}'
+    secureJsonData: {}
+
+  # =====================================================
+  # POSTGRESQL DATA SOURCE (Direct database queries)
+  # =====================================================
+  - name: PostgreSQL
+    type: postgres
+    access: proxy
+    orgId: 1
+    url: postgres:5432
+    database: pdf_converter_db
+    user: pdf_admin
+    version: 1
+    editable: true
+    jsonData:
+      database: pdf_converter_db
+      maxOpenConns: 10
+      maxIdleConns: 2
+      maxIdleConnsAuto: true
+      connMaxLifetime: 14400
+      postgresVersion: 1500
+      timescaledb: false
+      tlsAuth: false
+      tlsAuthWithCACert: false
+      tlsSkipVerify: false
+      sslmode: disable
+    secureJsonData:
+      password: 'PdfSecure2024!'
+
+  # =====================================================
+  # REDIS DATA SOURCE (Cache monitoring)
+  # =====================================================
+  - name: Redis
+    type: redis-datasource
+    access: proxy
+    orgId: 1
+    url: redis://redis:6379
+    version: 1
+    editable: true
+    jsonData:
+      client: 'standalone'
+      poolSize: 5
+      timeout: 10
+      pingInterval: 0
+      pipelineWindow: 0
+      tlsAuth: false
+      tlsSkipVerify: false
+    secureJsonData:
+      password: 'RedisSecure2024!'
+
+  # =====================================================
+  # LOKI DATA SOURCE (Log aggregation - for future use)
+  # =====================================================
+  - name: Loki
+    type: loki
+    access: proxy
+    orgId: 1
+    url: http://loki:3100
+    version: 1
+    editable: true
+    jsonData:
+      maxLines: 1000
+      derivedFields:
+        - datasourceUid: 'jaeger-uid'
+          matcherRegex: '"trace_id":"(\w+)"'
+          name: TraceID
+          url: 'http://jaeger:16686/trace/$${__value.raw}'
+    secureJsonData: {}
+
+  # =====================================================
+  # ELASTICSEARCH DATA SOURCE (Advanced log search - optional)
+  # =====================================================
+  - name: Elasticsearch
+    type: elasticsearch
+    access: proxy
+    orgId: 1
+    url: http://elasticsearch:9200
+    database: 'pdf-converter-logs-*'
+    version: 1
+    editable: true
+    jsonData:
+      database: 'pdf-converter-logs-*'
+      esVersion: '8.0.0'
+      includeFrozen: false
+      logLevelField: 'level'
+      logMessageField: 'message'
+      maxConcurrentShardRequests: 5
+      timeField: '@timestamp'
+      tlsAuth: false
+      tlsAuthWithCACert: false
+      tlsSkipVerify: false
+      interval: Daily
+      timeInterval: '10s'
+    secureJsonData: {}
+
+  # =====================================================
+  # JAEGER DATA SOURCE (Distributed tracing - optional)
+  # =====================================================
+  - name: Jaeger
+    type: jaeger
+    access: proxy
+    orgId: 1
+    uid: 'jaeger-uid'
+    url: http://jaeger:16686
+    version: 1
+    editable: true
+    jsonData:
+      tracesToLogs:
+        datasourceUid: 'loki-uid'
+        tags: ['job', 'instance', 'pod', 'namespace']
+        mappedTags: [{ key: 'service.name', value: 'service' }]
+        mapTagNamesEnabled: false
+        spanStartTimeShift: '1h'
+        spanEndTimeShift: '1h'
+        filterByTraceID: false
+        filterBySpanID: false
+      tracesToMetrics:
+        datasourceUid: 'prometheus-uid'
+        tags: [{ key: 'service.name', value: 'service' }, { key: 'job' }]
+        queries:
+          - name: 'Sample query'
+            query: 'sum(rate(traces_spanmetrics_latency_bucket{$$__tags}[5m]))'
+      nodeGraph:
+        enabled: true
+      search:
+        hide: false
+      spanBar:
+        type: 'Tag'
+        tag: 'http.path'
+    secureJsonData: {}
+
+  # =====================================================
+  # INFLUXDB DATA SOURCE (Time series data - optional)
+  # =====================================================
+  - name: InfluxDB
+    type: influxdb
+    access: proxy
+    orgId: 1
+    url: http://influxdb:8086
+    database: pdf_converter
+    version: 1
+    editable: true
+    jsonData:
+      version: 'Flux'
+      organization: 'pdf-converter'
+      defaultBucket: 'metrics'
+      tlsAuth: false
+      tlsAuthWithCACert: false
+      tlsSkipVerify: false
+      httpMode: 'POST'
+    secureJsonData:
+      token: 'your-influxdb-token'
+
+  # =====================================================
+  # CUSTOM JSON DATA SOURCE (API endpoints monitoring)
+  # =====================================================
+  - name: API-Stats
+    type: simplejson
+    access: proxy
+    orgId: 1
+    url: http://api-gateway:3000/api/v1/stats
+    version: 1
+    editable: true
+    jsonData:
+      tlsAuth: false
+      tlsAuthWithCACert: false
+      tlsSkipVerify: false
+    basicAuth: false
+    withCredentials: false
+    secureJsonData: {}
+
+  # =====================================================
+  # TESTDATA DATA SOURCE (For dashboard development)
+  # =====================================================
+  - name: TestData
+    type: testdata
+    access: proxy
+    orgId: 1
+    version: 1
+    editable: true
+    jsonData: {}
+    secureJsonData: {}
+
+# =====================================================
+# DATA SOURCE CONFIGURATION NOTES
+# =====================================================
+
+# Primary Data Sources:
+# 1. Prometheus - Main metrics collection (CPU, memory, HTTP requests, etc.)
+# 2. PostgreSQL - Direct database queries for business metrics
+# 3. Redis - Cache performance and usage statistics
+
+# Optional Data Sources:
+# 4. Loki - Log aggregation and correlation with metrics
+# 5. Elasticsearch - Advanced log search and analysis  
+# 6. Jaeger - Distributed tracing for request flow analysis
+# 7. InfluxDB - High-frequency time series data
+# 8. API-Stats - Custom application metrics via HTTP API
+# 9. TestData - For dashboard development and testing
+
+# Configuration Details:
+# - All proxy access for security within Docker network
+# - Connection pooling configured for database sources
+# - TLS disabled for internal development environment
+# - Correlation configured between traces, logs, and metrics
+# - Reasonable timeouts and query limits set
+
+# Security Considerations:
+# - Passwords stored in secureJsonData (encrypted)
+# - No TLS in development (enable for production)
+# - Limited connection pools to prevent resource exhaustion
+# - Query timeouts to prevent runaway queries
+
+# Performance Optimizations:
+# - Cache levels set appropriately
+# - Connection pooling enabled
+# - Reasonable query intervals
+# - Incremental query overlaps for better performance
+
+# Dashboard Integration:
+# - Data sources configured for cross-correlation
+# - Template variables supported
+# - Alerting enabled where applicable
+# - Custom query editors configured
+
+# Usage Examples:
+# Prometheus: infrastructure and application metrics
+# PostgreSQL: user counts, conversion statistics, business KPIs
+# Redis: cache hit rates, session counts, queue depths
+# Loki: error log analysis, request tracing
+# Jaeger: performance bottleneck identification
+# API-Stats: real-time application status

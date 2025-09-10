@@ -1,0 +1,324 @@
+# =====================================================
+# Grafana Dashboard Provisioning for PDF Converter
+# =====================================================
+# This file configures how dashboards are loaded into Grafana
+
+apiVersion: 1
+
+# =====================================================
+# DASHBOARD PROVIDERS
+# =====================================================
+providers:
+  # =====================================================
+  # SYSTEM DASHBOARDS
+  # =====================================================
+  - name: 'system-dashboards'
+    orgId: 1
+    folder: 'System Monitoring'
+    folderUid: 'system-folder'
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/system
+
+  # =====================================================
+  # APPLICATION DASHBOARDS  
+  # =====================================================
+  - name: 'application-dashboards'
+    orgId: 1
+    folder: 'PDF Converter Services'
+    folderUid: 'app-folder'
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/application
+
+  # =====================================================
+  # BUSINESS INTELLIGENCE DASHBOARDS
+  # =====================================================
+  - name: 'business-dashboards'
+    orgId: 1
+    folder: 'Business Intelligence'
+    folderUid: 'business-folder'
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/business
+
+  # =====================================================
+  # INFRASTRUCTURE DASHBOARDS
+  # =====================================================
+  - name: 'infrastructure-dashboards'
+    orgId: 1
+    folder: 'Infrastructure'
+    folderUid: 'infra-folder'
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 15
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/infrastructure
+
+  # =====================================================
+  # ALERTING DASHBOARDS
+  # =====================================================
+  - name: 'alerting-dashboards'
+    orgId: 1
+    folder: 'Alerts & SLA'
+    folderUid: 'alerts-folder'
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 5
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/alerts
+
+  # =====================================================
+  # DEVELOPMENT DASHBOARDS
+  # =====================================================
+  - name: 'development-dashboards'
+    orgId: 1
+    folder: 'Development'
+    folderUid: 'dev-folder'
+    type: file
+    disableDeletion: true
+    editable: true
+    updateIntervalSeconds: 60
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/development
+
+# =====================================================
+# DASHBOARD ORGANIZATION STRUCTURE
+# =====================================================
+
+# System Monitoring Folder:
+# - Overview Dashboard (all services status)
+# - Docker Container Metrics
+# - Host System Resources (CPU, Memory, Disk, Network)
+# - Network Traffic Analysis
+# - Security Monitoring
+
+# PDF Converter Services Folder:
+# - API Gateway Dashboard
+# - Authentication Service Monitoring
+# - File Service Performance
+# - Conversion Engine Analytics
+# - Notification Service Stats
+# - Service Dependencies Map
+# - Error Tracking & Analysis
+
+# Business Intelligence Folder:
+# - User Activity Analytics
+# - Conversion Success Rates
+# - File Processing Statistics
+# - Revenue & Usage Metrics
+# - Geographic Usage Patterns
+# - Premium vs Free User Analysis
+# - Mobile vs Web Usage
+# - API Usage Statistics
+
+# Infrastructure Folder:
+# - PostgreSQL Database Performance
+# - Redis Cache Analytics
+# - RabbitMQ Queue Monitoring
+# - MinIO Storage Statistics
+# - NGINX Load Balancer Stats
+# - Prometheus Targets Health
+# - Backup & Recovery Status
+
+# Alerts & SLA Folder:
+# - System Health Overview
+# - SLA Compliance Dashboard
+# - Critical Alerts Summary
+# - Performance SLA Tracking
+# - Incident Response Dashboard
+# - Capacity Planning Alerts
+
+# Development Folder:
+# - API Response Time Analysis
+# - Error Rate Trends
+# - Performance Regression Testing
+# - Load Testing Results
+# - Code Deployment Tracking
+# - Feature Usage Analytics
+
+# =====================================================
+# DASHBOARD CONFIGURATION DETAILS
+# =====================================================
+
+# Provider Settings:
+# - orgId: 1 (default organization)
+# - disableDeletion: false (allows dashboard deletion)
+# - editable: true (allows dashboard editing)
+# - updateIntervalSeconds: varies by dashboard type
+# - allowUiUpdates: true (allows UI modifications)
+
+# Folder Structure Benefits:
+# 1. Organized by domain/responsibility
+# 2. Easy navigation and discovery
+# 3. Role-based access control ready
+# 4. Logical grouping for different audiences
+
+# Update Intervals:
+# - Alerts: 5 seconds (real-time critical monitoring)
+# - System: 10 seconds (frequent infrastructure checks)
+# - Infrastructure: 15 seconds (database, queues, storage)
+# - Applications: 10 seconds (service performance)
+# - Business: 30 seconds (analytics don't need real-time)
+# - Development: 60 seconds (longer-term trends)
+
+# Dashboard Types to be Created:
+
+# =====================================================
+# 1. SYSTEM OVERVIEW DASHBOARD
+# =====================================================
+# Panels:
+# - Service Status Grid (green/red indicators)
+# - Overall System Health Score
+# - Request Rate (requests/second)
+# - Error Rate Percentage
+# - Response Time Percentiles (p50, p95, p99)
+# - Active Users Count
+# - Queue Depths Summary
+# - Storage Usage Summary
+
+# =====================================================
+# 2. API GATEWAY DASHBOARD
+# =====================================================
+# Panels:
+# - HTTP Request Rate by Endpoint
+# - Response Time Distribution
+# - Error Rate by Status Code
+# - Rate Limiting Triggers
+# - Geographic Request Distribution
+# - User Authentication Success/Failure
+# - API Key Usage Statistics
+
+# =====================================================
+# 3. CONVERSION ENGINE DASHBOARD
+# =====================================================
+# Panels:
+# - Conversion Jobs Processing Rate
+# - Success vs Failure Rates
+# - Average Conversion Time by File Type
+# - Queue Depth and Wait Times
+# - Resource Usage (CPU, Memory) During Conversion
+# - Error Analysis by File Type
+# - Throughput Trends
+
+# =====================================================
+# 4. DATABASE PERFORMANCE DASHBOARD
+# =====================================================
+# Panels:
+# - Connection Pool Utilization
+# - Query Performance (slowest queries)
+# - Database Size and Growth
+# - Transaction Rate
+# - Lock Wait Times
+# - Backup Status
+# - Replication Lag (if applicable)
+
+# =====================================================
+# 5. BUSINESS ANALYTICS DASHBOARD
+# =====================================================
+# Panels:
+# - Daily Active Users
+# - Conversion Volume Trends
+# - File Type Popularity
+# - Geographic Usage Heat Map
+# - Premium Conversion Rate
+# - Revenue Tracking
+# - User Retention Metrics
+
+# =====================================================
+# 6. INFRASTRUCTURE HEALTH DASHBOARD
+# =====================================================
+# Panels:
+# - CPU Utilization Across All Services
+# - Memory Usage Patterns
+# - Disk I/O Performance
+# - Network Traffic Analysis
+# - Container Restart Frequency
+# - Log Error Rate Trends
+
+# =====================================================
+# DASHBOARD BEST PRACTICES
+# =====================================================
+
+# Layout Principles:
+# 1. Most important metrics at the top
+# 2. Time series charts for trends
+# 3. Single stat panels for current values
+# 4. Heatmaps for distribution analysis
+# 5. Tables for detailed breakdowns
+
+# Color Coding:
+# - Green: Healthy/Good performance
+# - Yellow: Warning/Degraded performance  
+# - Red: Critical/Failed state
+# - Blue: Informational metrics
+# - Purple: Business metrics
+
+# Time Ranges:
+# - Default: Last 1 hour
+# - Quick ranges: 5m, 15m, 1h, 6h, 24h, 7d
+# - Custom range picker enabled
+# - Auto-refresh: 30 seconds for operational dashboards
+
+# Variables/Templates:
+# - Environment (development, staging, production)
+# - Service (api-gateway, auth-service, etc.)
+# - User Tier (free, premium, enterprise)
+# - Time Range (quick selection)
+# - Percentile (for response time analysis)
+
+# Annotations:
+# - Deployment markers
+# - Incident timestamps
+# - Maintenance windows
+# - Code release versions
+
+# Alerting Integration:
+# - Visual indicators for active alerts
+# - Links to alert details
+# - Silence alert options
+# - Alert history panels
+
+# Export/Sharing:
+# - PNG export for reports
+# - PDF generation for executives
+# - Direct URL sharing
+# - Embed codes for external tools
+
+# =====================================================
+# DASHBOARD MAINTENANCE
+# =====================================================
+
+# Version Control:
+# - Dashboard JSON stored in git
+# - Change tracking and rollback
+# - Automated testing for dashboard validity
+
+# Performance:
+# - Optimized queries for fast loading
+# - Appropriate time ranges
+# - Efficient use of template variables
+# - Caching where appropriate
+
+# Documentation:
+# - Panel descriptions
+# - Metric definitions
+# - Troubleshooting guides
+# - Contact information for dashboard owners
