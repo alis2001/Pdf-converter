@@ -1,180 +1,68 @@
 # =====================================================
-# ENTERPRISE PDF CONVERTER - GITIGNORE
+# PERMISSIVE .GITIGNORE FOR DEVELOPMENT
 # =====================================================
-# Protects secrets while allowing infrastructure files to be committed
+# This allows pushing almost everything for easy development
+# Only excludes runtime data and dependencies
 
 # =====================================================
-# SENSITIVE DATA - NEVER COMMIT
+# NODE.JS DEPENDENCIES - ALWAYS EXCLUDE
 # =====================================================
-# Production environment files (development .env is OK to commit with dummy data)
-.env.production
-.env.staging
-.env.prod
-.env.stage
-
-# Real SSL certificates and keys
-ssl/
-certificates/
-certs/
-*.pem
-*.key
-*.crt
-*.p12
-*.pfx
-
-# Real API keys and tokens
-api-keys.production.json
-tokens.production.json
-*.production.token
-
-# =====================================================
-# RUNTIME DATA & LOGS - EXCLUDE
-# =====================================================
-# Log files
-logs/
-*.log
+node_modules/
+*/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
 
-# Runtime data
-pids
+# =====================================================
+# RUNTIME DATA ONLY - EXCLUDE
+# =====================================================
+# Log files (runtime logs only, not log configs)
+logs/*.log
+logs/*/*.log
+*.log
+
+# Process files
 *.pid
 *.seed
 *.pid.lock
 
 # =====================================================
-# NODE.JS DEPENDENCIES - EXCLUDE
+# BUILD OUTPUTS - EXCLUDE  
 # =====================================================
-# Dependencies
-node_modules/
-*/node_modules/
-
-# Package manager files (keep package.json, exclude locks temporarily)
-# npm-shrinkwrap.json
-
-# =====================================================
-# BUILD OUTPUTS - EXCLUDE
-# =====================================================
-# Build directories
 dist/
 build/
 *.tgz
 *.tar.gz
 
-# Compiled binary files
-*.o
-*.so
-*.dylib
-*.dll
-
 # =====================================================
-# DATABASE & STORAGE - EXCLUDE RUNTIME DATA
+# RUNTIME UPLOADS - EXCLUDE
 # =====================================================
-# Database files (runtime data, not schema)
-*.db
-*.sqlite
-*.sqlite3
-
-# Upload directories (runtime files, not structure)
+# Actual uploaded files (not directory structure)
 uploads/*
-temp-uploads/*
 !uploads/.gitkeep
+
+temp-uploads/*
 !temp-uploads/.gitkeep
 
-# Backup files (runtime backups, not backup configs)
+# Runtime backup files (not backup configs)
 backups/postgres/*
 backups/minio/*
 !backups/postgres/.gitkeep
 !backups/minio/.gitkeep
 
 # =====================================================
-# DOCKER RUNTIME - EXCLUDE
+# IDE TEMP FILES - EXCLUDE
 # =====================================================
-# Docker runtime data
-.docker/
+.vscode/settings.json
+.idea/workspace.xml
 
-# =====================================================
-# IDE & OS FILES - EXCLUDE
-# =====================================================
-# Visual Studio Code
-.vscode/
-*.code-workspace
-
-# IntelliJ IDEA
-.idea/
-*.iml
-*.ipr
-*.iws
-
-# Vim
-*.swp
-*.swo
-*~
-
-# OS generated files
+# OS temp files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
-Desktop.ini
-
-# =====================================================
-# TESTING & COVERAGE - EXCLUDE
-# =====================================================
-# Coverage reports
-coverage/
-*.lcov
-.nyc_output
-
-# Test results
-test-results/
-junit.xml
 
 # =====================================================
 # TEMPORARY FILES - EXCLUDE
 # =====================================================
-# Temporary files
 tmp/
-temp/
 *.tmp
 *.temp
-
-# Cache directories
-.cache
-.parcel-cache
-.next
-.nuxt
-
-# =====================================================
-# WHAT GETS COMMITTED (INFRASTRUCTURE FILES)
-# =====================================================
-# ✅ All these files WILL be committed:
-# - docker-compose.yml
-# - .env (development with dummy passwords)
-# - infrastructure/ (all config files)
-# - backend/ (service code when created)
-# - frontend/ (app code when created)
-# - scripts/ (automation scripts)
-# - docs/ (documentation)
-# - README.md, package.json files
-
-# =====================================================
-# KEEP DIRECTORY STRUCTURE
-# =====================================================
-# Keep empty directories
-!.gitkeep
-
-# =====================================================
-# NOTES FOR PRODUCTION
-# =====================================================
-# For production deployment:
-# 1. Copy .env to .env.production with real secrets
-# 2. Use real SSL certificates
-# 3. Set strong passwords in production environment
-# 4. Use secrets management (Vault, AWS Secrets Manager, etc.)
-# 5. Enable security scanning in CI/CD pipeline
